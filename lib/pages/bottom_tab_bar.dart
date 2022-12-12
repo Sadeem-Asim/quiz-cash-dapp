@@ -3,7 +3,7 @@ import 'package:quiz_cash/pages/constants/colors.dart';
 import 'package:quiz_cash/pages/mining_second.dart';
 import 'package:quiz_cash/pages/quiz_home_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:quiz_cash/pages/wallet.dart';
+import 'package:quiz_cash/pages/wallet1.dart';
 
 import '../widgets/tab_bar_icons.dart';
 import 'mining_first.dart';
@@ -18,7 +18,7 @@ class BottomTabBar extends StatefulWidget {
 class _BottomTabBarState extends State<BottomTabBar> {
   int currentIndex = 0;
   List screens = <Widget>[
-    const QuizHomeScreen(),
+    // const QuizHomeScreen(),
     const MiningFirst(),
     const MiningScreenTwo(),
     const WalletScreen(),
@@ -43,7 +43,6 @@ class _BottomTabBarState extends State<BottomTabBar> {
                     : AppColors.lightGrey,
                 text: "Quiz Cash",
                 onPress: () {
-
                   setState(() {
                     currentIndex = 0;
                   });

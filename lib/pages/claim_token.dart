@@ -70,7 +70,6 @@ class _ClaimTokenScreenState extends State<ClaimTokenScreen> {
                         ],
                       ),
                       child: Column(
-                        // mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(height: 30.h),
                           const Text(

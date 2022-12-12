@@ -1,303 +1,207 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:quiz_cash/pages/claim_token.dart';
-import '../widgets/button_item.dart';
-import 'constants/colors.dart';
+import 'package:flutter/services.dart';
+import 'package:quiz_cash/pages/approve_token.dart';
 
-class WalletScreen extends StatefulWidget {
-  const WalletScreen({super.key});
+import '../pages/data/repo/wallet_connector.dart';
 
-  @override
-  State<WalletScreen> createState() => _WalletScreenState();
+enum TransactionState {
+  idle,
+  sending,
+  successful,
+  failed,
 }
 
-class _WalletScreenState extends State<WalletScreen> {
-  bool valueTrue = true;
+class WalletPage extends StatefulWidget {
+  WalletPage({
+    required this.connector,
+    Key? key,
+  }) : super(key: key);
+
+  final WalletConnector connector;
+
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage> {
+  late Future<double> balanceFuture = widget.connector.getBalance();
+  final addressController = TextEditingController();
+  final amountController = TextEditingController();
+  bool validateAddress = true;
+  bool validateAmount = true;
+  TransactionState state = TransactionState.idle;
+  late String address = widget.connector.address;
+
+  @override
+  void dispose() {
+    addressController.dispose();
+    amountController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    Future.delayed(const Duration(seconds: 1), () => copyAddressToClipboard());
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                "assets/images/background2.png",
-              ),
-              fit: BoxFit.cover,
-            ),
-          ),
+    return Scaffold(
+      appBar: AppBar(),
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 25.w,
-            ),
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 40.w,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      "assets/images/coin.png",
-                    ),
-                    SizedBox(width: 10.w),
-                    Text(
-                      '5,000',
-                      style: TextStyle(
-                          fontSize: 24.sp, fontWeight: FontWeight.w700),
-                    ),
-                    SizedBox(width: 10.w),
-                    Container(
-                      alignment: Alignment.center,
-                      width: 88.w,
-                      height: 31.h,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        color: AppColors.greenColor,
-                        borderRadius: BorderRadius.circular(
-                          4,
-                        ),
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 1.5.w,
-                        ),
-                      ),
-                      child: Text(
-                        "EXCHANGE",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  'Wallet',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: Colors.black,
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    'Address',
+                    style: Theme.of(context).textTheme.headline5,
                   ),
                 ),
-                SizedBox(height: 10.h),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20).r,
-                    border: Border.all(
-                      color: AppColors.btnGreenColor,
-                      width: 2.w,
-                    ),
+                Text(address),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    'Balance',
+                    style: Theme.of(context).textTheme.headline5,
                   ),
-                  height: 50,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 20.w,
-                      ),
-                      const Expanded(
-                        child: TextField(
-                          textAlign: TextAlign.start,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'gyts****bhd33',
-                            hintStyle: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                FutureBuilder<double>(
+                  future: balanceFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final balance = snapshot.data;
+
+                      print(snapshot.data);
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                              '${balance!.toStringAsFixed(5)} ${widget.connector.coinName}'),
+                          Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => setState(() {
+                                  widget.connector.approve();
+                                }),
+                                child: const Text('Refresh'),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      VerticalDivider(
-                        color: AppColors.btnGreenColor,
-                        thickness: 3,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15.w),
-                        child: Image.asset(
-                          color: Colors.black54,
-                          "assets/images/gallery.png",
-                        ),
-                      ),
-                    ],
+                        ],
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: TextField(
+                    controller: addressController,
+                    keyboardType: TextInputType.text,
+                    autocorrect: false,
+                    enableSuggestions: true,
+                    decoration: InputDecoration(
+                      labelText: 'Recipient address',
+                      errorText: validateAddress ? null : 'Invalid address',
+                    ),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 24.h,
-                  ),
-                  child: Container(
-                    height: 55.h,
-                    width: 310.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: AppColors.btnGreenColor,
-                        width: 2,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                valueTrue = true;
-                              });
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 47.h,
-                              width: 146.w,
-                              decoration: BoxDecoration(
-                                color: valueTrue
-                                    ? AppColors.btnGreenColor
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: valueTrue
-                                      ? AppColors.borderColor
-                                      : Colors.transparent,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                "Token Assets",
-                                style: TextStyle(
-                                  color: valueTrue ? Colors.white : Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                setState(() {
-                                  valueTrue = false;
-                                });
-                              });
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50.h,
-                              width: 146.w,
-                              decoration: BoxDecoration(
-                                color: valueTrue
-                                    ? Colors.transparent
-                                    : AppColors.btnGreenColor,
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: valueTrue
-                                      ? Colors.transparent
-                                      : AppColors.borderColor,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                "NFT",
-                                style: TextStyle(
-                                  color:
-                                      valueTrue ? Colors.black : Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  padding: const EdgeInsets.only(top: 16),
+                  child: TextField(
+                    controller: amountController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: 'Amount',
+                      errorText: validateAmount
+                          ? null
+                          : 'Please enter amount in ${widget.connector.coinName}',
                     ),
                   ),
                 ),
-                // const SizedBox(height: 60),
-                Stack(
-                  children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
-                      height: 270.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(
-                          color: AppColors.borderColor,
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.borderColor,
-                            offset: const Offset(
-                              2.5,
-                              2.5,
-                            ),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: const CircleAvatar(
-                              backgroundImage:
-                                  AssetImage("assets/images/icon1.png"),
-                            ),
-                            title: Text(
-                              'O uHGT',
-                              style: TextStyle(
-                                fontSize: 20.0.sp,
-                              ),
-                            ),
-                            subtitle: const Text('Unlock Hooked Gold Token'),
-                          ),
-                          ListTile(
-                            leading: const CircleAvatar(
-                              backgroundImage:
-                                  AssetImage("assets/images/icon2.png"),
-                            ),
-                            title: Text(
-                              'O uHGT',
-                              style: TextStyle(
-                                fontSize: 20.sp,
-                              ),
-                            ),
-                            subtitle: const Text('Unlock Hooked Gold Token'),
-                          ),
-                          const SizedBox(height: 10),
-                          ButtonWidget(
-                            height: 50.h,
-                            width: 200.w,
-                            ontap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                      const ClaimTokenScreen()));
-                            },
-                            title: "Swap & Transfer",
-                          )
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      child: Container(
-                        color: Colors.white,
-                        child: Image.asset(
-                          "assets/images/black_curve.png",
-                        ),
-                      ),
-                    ),
-                  ],
-                )
+                Padding(
+                  padding: const EdgeInsets.only(top: 32),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      FocusScope.of(context).unfocus();
+                      if (amountController.text.isNotEmpty) {
+                        setState(() => validateAmount = true);
+                        if (widget.connector
+                            .validateAddress(address: addressController.text)) {
+                          setState(() => validateAddress = true);
+
+                          await transactionAction(address);
+                        } else {
+                          setState(() => validateAddress = false);
+                        }
+                      } else {
+                        setState(() => validateAmount = false);
+                      }
+                    },
+                    child: Text(transactionString()),
+                  ),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  String transactionString() {
+    switch (state) {
+      case TransactionState.idle:
+        return 'Send transaction';
+      case TransactionState.sending:
+        return 'Sending transaction. Please go back to the Wallet to confirm.';
+      case TransactionState.successful:
+        return 'Transaction successful';
+      case TransactionState.failed:
+        return 'Transaction failed';
+    }
+  }
+
+  Future<void> transactionAction(String address) async {
+    switch (state) {
+      case TransactionState.idle:
+        setState(() => state = TransactionState.sending);
+
+        Future.delayed(Duration.zero, () => widget.connector.openWalletApp());
+
+        final hash = await widget.connector.sendAmount(
+            recipientAddress: addressController.text,
+            amount: double.parse(amountController.text));
+
+        if (hash != null) {
+          setState(() => state = TransactionState.successful);
+        } else {
+          address = address;
+          setState(() => state = TransactionState.failed);
+        }
+        break;
+      case TransactionState.sending:
+      case TransactionState.successful:
+      case TransactionState.failed:
+        break;
+    }
+  }
+
+  void copyAddressToClipboard() {
+    Clipboard.setData(ClipboardData(text: widget.connector.address));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        duration: Duration(milliseconds: 500),
+        content: Text('Address copied!'),
       ),
     );
   }

@@ -79,7 +79,8 @@ class _BuyTokenScreenState extends State<BuyTokenScreen> {
                           SizedBox(height: 30.h),
                           const Text(
                             "Buy Token",
-                            style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.w600),
                           ),
                           SizedBox(height: 80.h),
                           const TokenTextField(

@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -30,10 +30,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  http: ^0.13.5
+  walletconnect_qrcode_modal_dart: 0.0.5
+  web3dart: 2.3.5
+  build_runner: ^2.1.2
+  erc20: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -53,14 +57,12 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/baselogo.png"
-   
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -73,8 +75,11 @@ flutter:
     - assets/images/england.png
     - assets/images/spain.png
     - assets/images/arrow.png
+    - assets/images/level.png
     - assets/images/gender.png
     - assets/images/Q.png
+    - assets/quizbox_abi.json
+    - assets/erc20.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -87,11 +92,11 @@ flutter:
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
-   #example:
+  #example:
   fonts:
-   - family: poppins
-     fonts:
-       - asset: assets/fonts/Poppins-Regular.ttf
+    - family: poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

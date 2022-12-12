@@ -1,17 +1,161 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_cash/pages/data/repo/wallet_connector.dart';
+import 'package:quiz_cash/pages/result_screen.dart';
+import 'package:quiz_cash/pages/result_sucess.dart';
 import 'package:quiz_cash/pages/training_camp_first.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'constants/colors.dart';
+import "package:http/http.dart" as http;
+import 'dart:convert';
+import 'dart:async';
 
 class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+  var level;
 
+  QuizPage({required this.level, required this.connector, super.key});
+  WalletConnector connector;
   @override
   State<QuizPage> createState() => _QuizPageState();
 }
 
 class _QuizPageState extends State<QuizPage> {
-  bool valueTrue = true;
+  List<String> ques = [];
+  List<String> answers = [];
+  var questions;
+  var aQuestion;
+  var que;
+  var option1;
+  var option2;
+  var option3;
+  var option4;
+  var optionSelected = "";
+  var _start = 0;
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    Timer _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+            if (optionSelected.length == 0) optionSelected = "A";
+            increment();
+            startTimer();
+          });
+        } else {
+          setState(() {
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  Future<void> getQuestions() async {
+    final response = await http.get(Uri.parse(
+        "https://quizcash.herokuapp.com/questions/get/level/${widget.level}"));
+    var data = jsonDecode(response.body.toString());
+    print(data);
+    setState(() {
+      aQuestion = 0;
+      aQuestion = "Loading";
+    });
+    if (response.statusCode == 200) {
+      setState(() {
+        questions = data["selected"];
+        que = questions[0];
+        _start = que["timer"];
+        aQuestion = que["question"];
+        option1 = que["options"][0];
+        option2 = que["options"][1];
+        option3 = que["options"][2];
+        option4 = que["options"][3];
+        startTimer();
+      });
+    } else {
+      print("Api Error");
+    }
+  }
+
+  int count = 0;
+  // api call
+  void increment() {
+    if (count <= 8) {
+      setState(() {
+        print(ques);
+        print(answers);
+        count++;
+        que = questions[count];
+        _start = que["timer"];
+        aQuestion = que["question"];
+        option1 = que["options"][0];
+        option2 = que["options"][1];
+        option3 = que["options"][2];
+        option4 = que["options"][3];
+        optionSelected = "";
+      });
+    }
+  }
+
+  void checkAnswers() async {
+    Map data = {"questions": ques, "answers": answers};
+    var body = json.encode(data);
+    final response = await http.post(
+        Uri.parse("https://quizcash.herokuapp.com/questions/checkAnswers"),
+        headers: {"Content-Type": "application/json"},
+        body: body);
+    var res = jsonDecode(response.body.toString());
+    print(res);
+    if (res["message"] == "failed") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultScreen(
+              connector: widget.connector,
+              totalQuestions: res["totalQuestions"],
+              correctAnswers: res["correctAnswers"],
+              wrongAnswers: res["wrongAnswers"]),
+        ),
+      );
+    } else if (res["message"] == "Success! You Passed") {
+      Map data = {"address": widget.connector.address, "reward": res["reward"]};
+      var body = json.encode(data);
+      final response = http.post(
+          Uri.parse("https://quizcash.herokuapp.com/claimReward/create"),
+          headers: {"Content-Type": "application/json"},
+          body: body);
+      Map l = {"level": "${widget.level + 1}"};
+      var l1 = json.encode(l);
+      if (widget.level + 1 <= 3) {
+        final result = http.put(
+            Uri.parse(
+                "https://quizcash.herokuapp.com/players/update/level/${widget.connector.address}"),
+            headers: {"Content-Type": "application/json"},
+            body: l1);
+      }
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultSuccessScreen(
+              connector: widget.connector,
+              reward: res["reward"],
+            ),
+          ));
+    }
+  }
+
+  initState() {
+    super.initState();
+    setState(() {
+      count = 0;
+      aQuestion = "Loading";
+      option1 = "...";
+      option2 = "...";
+      option3 = "...";
+      option4 = "...";
+    });
+    getQuestions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +178,12 @@ class _QuizPageState extends State<QuizPage> {
                   child: Stack(
                 children: [
                   Image.asset("assets/images/quiz_image.png"),
-                  const Positioned(
-                    // top: 100,
+                  Positioned(
                     bottom: 10,
-                    right: 130,
-
+                    right: 140,
                     child: Text(
-                      "1/10",
-                      style: TextStyle(
+                      "${count + 1}/10",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -57,7 +199,7 @@ class _QuizPageState extends State<QuizPage> {
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    height: 270,
+                    height: 370,
                     width: 360,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -80,42 +222,43 @@ class _QuizPageState extends State<QuizPage> {
                         SizedBox(
                           height: 42.h,
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
                           child: Text(
-                            "The Matavers is the \n bockchain. The statemeny \nis:",
+                            "$aQuestion",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                        Row(
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             InkWell(
                               onTap: () {
-                                print("valuetrue");
                                 setState(() {
-                                  valueTrue = true;
+                                  optionSelected = "A";
                                 });
                               },
                               child: Row(
                                 children: [
-                                  valueTrue
+                                  const SizedBox(
+                                    width: 30,
+                                  ),
+                                  optionSelected == "A"
                                       ? Image.asset("assets/images/true.png")
                                       : Image.asset("assets/images/false.png"),
                                   const SizedBox(
-                                    width: 6,
+                                    width: 10,
                                   ),
                                   Text(
-                                    "Correct",
-                                    style: TextStyle(
+                                    "$option1",
+                                    style: const TextStyle(
                                       fontSize: 18,
-                                      color: valueTrue
-                                          ? AppColors.greenColor
-                                          : Colors.grey,
+                                      color: Colors.grey,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
@@ -124,26 +267,87 @@ class _QuizPageState extends State<QuizPage> {
                             ),
                             InkWell(
                               onTap: () {
-                                print("valueFalse");
                                 setState(() {
-                                  valueTrue = false;
+                                  optionSelected = "B";
                                 });
                               },
                               child: Row(
                                 children: [
-                                  valueTrue
-                                      ? Image.asset("assets/images/false.png")
-                                      : Image.asset("assets/images/true.png"),
                                   const SizedBox(
-                                    width: 6,
+                                    width: 30,
+                                  ),
+                                  optionSelected == "B"
+                                      ? Image.asset("assets/images/true.png")
+                                      : Image.asset("assets/images/false.png"),
+                                  const SizedBox(
+                                    width: 10,
                                   ),
                                   Text(
-                                    "Correct",
-                                    style: TextStyle(
+                                    "$option2",
+                                    style: const TextStyle(
                                       fontSize: 18,
-                                      color: valueTrue
-                                          ? Colors.grey
-                                          : AppColors.greenColor,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  optionSelected = "C";
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 30,
+                                  ),
+                                  optionSelected == "C"
+                                      ? Image.asset("assets/images/true.png")
+                                      : Image.asset("assets/images/false.png"),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    "$option3",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  optionSelected = "D";
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 30,
+                                  ),
+                                  optionSelected == "D"
+                                      ? Image.asset("assets/images/true.png")
+                                      : Image.asset("assets/images/false.png"),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    "$option4",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.grey,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
@@ -159,15 +363,7 @@ class _QuizPageState extends State<QuizPage> {
                           child: Align(
                             alignment: Alignment.bottomCenter,
                             child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const TrainigCampFirst(),
-                                  ),
-                                );
-                              },
+                              onTap: () {},
                               child: Container(
                                 height: 46.h,
                                 width: 100.w,
@@ -178,14 +374,30 @@ class _QuizPageState extends State<QuizPage> {
                                   color: AppColors.greenColor,
                                   borderRadius: BorderRadius.circular(30),
                                 ),
-                                child: const Center(
-                                  child: Text(
-                                    "Submit",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                    ),
+                                child: Center(
+                                  child: TextButton(
+                                    child: Text("Submit",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        )),
+                                    onPressed: () {
+                                      if (count >= 9) {
+                                        setState(() {
+                                          ques.add(que["id"]);
+                                          answers.add(optionSelected);
+                                        });
+                                        checkAnswers();
+                                      } else if (optionSelected.length == 1) {
+                                        setState(() {
+                                          ques.add(que["id"]);
+                                          answers.add(optionSelected);
+                                        });
+                                        increment();
+                                      }
+                                    },
+                                    style: ButtonStyle(),
                                   ),
                                 ),
                               ),
@@ -221,8 +433,8 @@ class _QuizPageState extends State<QuizPage> {
                           width: 2,
                         ),
                       ),
-                      child: const Text(
-                        "59",
+                      child: Text(
+                        "${_start}",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,

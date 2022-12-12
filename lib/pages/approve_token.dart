@@ -4,9 +4,17 @@ import 'package:quiz_cash/pages/buy_token.dart';
 import 'package:quiz_cash/pages/constants/colors.dart';
 import 'package:quiz_cash/widgets/button_item.dart';
 import 'package:quiz_cash/widgets/token_text_field.dart';
+import "package:quiz_cash/pages/data/ethereum_connector.dart";
+import 'package:web3dart/credentials.dart';
+import '../pages/data/repo/wallet_connector.dart';
+import 'package:erc20/erc20.dart';
+import 'package:web3dart/web3dart.dart';
+import 'package:http/src/client.dart';
 
 class ApprovalTokenScreen extends StatefulWidget {
-  const ApprovalTokenScreen({Key? key}) : super(key: key);
+  ApprovalTokenScreen({required this.connector, Key? key}) : super(key: key);
+
+  final WalletConnector connector;
 
   @override
   State<ApprovalTokenScreen> createState() => _ApprovalTokenScreenState();
@@ -14,7 +22,7 @@ class ApprovalTokenScreen extends StatefulWidget {
 
 class _ApprovalTokenScreenState extends State<ApprovalTokenScreen> {
   bool status = false;
-
+  late String address = widget.connector.address;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,19 +83,23 @@ class _ApprovalTokenScreenState extends State<ApprovalTokenScreen> {
                         children: [
                           SizedBox(height: 30.h),
                           const Text(
-                            "Buy Token",
-                            style: TextStyle(fontSize: 22,fontWeight: FontWeight.w600),
+                            "Approve Token",
+                            style: TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.w600),
                           ),
                           SizedBox(height: 60.h),
                           ButtonWidget(
                               height: 55,
                               width: double.infinity,
-                              ontap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const BuyTokenScreen()));
+                              ontap: () async {
+                                final res = await widget.connector.approve();
+                                if (res) {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const BuyTokenScreen()));
+                                }
                               },
                               title: "Approve"),
                         ],

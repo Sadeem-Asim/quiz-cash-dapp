@@ -1,0 +1,562 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "BuyGameTokens",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_claimId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_sigTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimReward",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "VALIDATOR_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "VALIDATOR_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "claimWindow",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "enabledClaimed",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isInBlacklist",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "record",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "recordId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "time",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "token",
+    "outputs": [
+      {
+        "internalType": "contract IERC20Upgradeable",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20Upgradeable",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "__QuizBoxReward_init",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IERC20Upgradeable",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "setToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "_claim",
+        "type": "bool"
+      }
+    ],
+    "name": "enabledClaim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_time",
+        "type": "uint256"
+      }
+    ],
+    "name": "setClaimWindow",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_enabled",
+        "type": "bool"
+      }
+    ],
+    "name": "setBlacklist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyGameTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_claimId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_reward",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_sigTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_Signature",
+        "type": "bytes"
+      }
+    ],
+    "name": "claimReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

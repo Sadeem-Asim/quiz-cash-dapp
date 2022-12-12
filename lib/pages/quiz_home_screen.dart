@@ -5,16 +5,46 @@ import 'package:quiz_cash/pages/quiz_page.dart';
 import 'package:quiz_cash/pages/training_camp.dart';
 import 'package:quiz_cash/widgets/action_button.dart';
 import 'package:quiz_cash/widgets/price_container.dart';
+import "package:http/http.dart" as http;
+import 'dart:convert';
+import 'dart:async';
+
+import 'data/repo/wallet_connector.dart';
 
 class QuizHomeScreen extends StatefulWidget {
-  const QuizHomeScreen({Key? key}) : super(key: key);
+  const QuizHomeScreen({required this.connector, Key? key}) : super(key: key);
 
+  final WalletConnector connector;
   @override
   State<QuizHomeScreen> createState() => _QuizHomeScreenState();
 }
 
 class _QuizHomeScreenState extends State<QuizHomeScreen> {
   bool status = false;
+  var tokens = 0;
+  var level = 0;
+
+  late String address = widget.connector.address;
+
+  void initState() {
+    super.initState();
+    getUserData();
+    setState(() {
+      tokens = 0;
+    });
+  }
+
+  void getUserData() async {
+    print("Calling Api");
+    final response = await http
+        .get(Uri.parse("https://quizcash.herokuapp.com/players/get/$address"));
+    var data = jsonDecode(response.body.toString());
+    var player = data["player"];
+    setState(() {
+      tokens = player["token"];
+      level = player["level"];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +68,14 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                      EdgeInsets.symmetric(horizontal: 30.w, vertical: 20.h),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         "Airdrop",
                         style: TextStyle(
-                          fontSize: 22.sp,
+                          fontSize: 32.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -59,11 +89,11 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.only(left: 16),
+                            Padding(
+                              padding: EdgeInsets.only(left: 30),
                               child: Text(
-                                "0",
-                                style: TextStyle(
+                                "$level",
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 21,
                                 ),
@@ -71,6 +101,38 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                             ),
                             Container(
                               width: 38.w,
+                              height: 29.h,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: green,
+                              ),
+                              child: Image.asset("assets/images/level.png"),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 90.w,
+                        height: 38.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 7),
+                              child: Text(
+                                "$tokens",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 21,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 44.w,
                               height: 29.h,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
@@ -137,7 +199,7 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                                 title: "AWARDS",
                               ),
                               PriceContainer(
-                                count: "00:00",
+                                count: "05:00",
                                 title: "TIME",
                               ),
                             ],
@@ -150,7 +212,10 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const QuizPage(),
+                                    builder: (context) => QuizPage(
+                                      level: level,
+                                      connector: widget.connector,
+                                    ),
                                   ),
                                 );
                               },
@@ -256,8 +321,10 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TraningCenter(),
+                                          builder: (context) => QuizPage(
+                                            level: level,
+                                            connector: widget.connector,
+                                          ),
                                         ),
                                       );
                                     },
