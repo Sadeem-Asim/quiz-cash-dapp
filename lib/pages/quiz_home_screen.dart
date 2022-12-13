@@ -8,7 +8,7 @@ import 'package:quiz_cash/widgets/price_container.dart';
 import "package:http/http.dart" as http;
 import 'dart:convert';
 import 'dart:async';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'data/repo/wallet_connector.dart';
 
 class QuizHomeScreen extends StatefulWidget {
@@ -188,7 +188,7 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: const [
                               PriceContainer(
-                                count: "500 M",
+                                count: "Upto 2x",
                                 title: "AWARDS",
                               ),
                               PriceContainer(
@@ -364,189 +364,13 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                   ],
                 ),
                 SizedBox(
-                  height: 22.h,
+                  height: 6.h,
                 ),
                 Stack(
                   children: [
                     Container(
                       width: 280.w,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(0),
-                        ),
-                        border:
-                            Border.all(color: AppColors.greenColor, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.greenColor,
-                            offset: const Offset(
-                              2.5,
-                              2.5,
-                            ),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Image.asset("assets/images/tent.png"),
-                              Column(
-                                children: [
-                                  Text(
-                                    textAlign: TextAlign.center,
-                                    "Crypto Camp",
-                                    style: TextStyle(
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 12.h,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      if (level == 1 && tokens >= 100) {
-                                        Map data = {"token": -100};
-                                        var l1 = json.encode(data);
-                                        final result = await http.put(
-                                            Uri.parse(
-                                                "https://quizcash.herokuapp.com/players/update/token/${widget.connector.address}"),
-                                            headers: {
-                                              "Content-Type": "application/json"
-                                            },
-                                            body: l1);
-
-                                        setState(() {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => QuizPage(
-                                                level: level,
-                                                connector: widget.connector,
-                                              ),
-                                            ),
-                                          );
-                                        });
-                                      } else if (level == 2 && tokens >= 200) {
-                                        Map data = {"token": -200};
-                                        var l1 = json.encode(data);
-                                        final result = await http.put(
-                                            Uri.parse(
-                                                "https://quizcash.herokuapp.com/players/update/token/${widget.connector.address}"),
-                                            headers: {
-                                              "Content-Type": "application/json"
-                                            },
-                                            body: l1);
-
-                                        setState(() {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => QuizPage(
-                                                level: level,
-                                                connector: widget.connector,
-                                              ),
-                                            ),
-                                          );
-                                        });
-                                      } else if (level == 3 && tokens >= 300) {
-                                        Map data = {"token": -300};
-                                        var l1 = json.encode(data);
-                                        final result = await http.put(
-                                            Uri.parse(
-                                                "https://quizcash.herokuapp.com/players/update/token/${widget.connector.address}"),
-                                            headers: {
-                                              "Content-Type": "application/json"
-                                            },
-                                            body: l1);
-
-                                        setState(() {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => QuizPage(
-                                                level: level,
-                                                connector: widget.connector,
-                                              ),
-                                            ),
-                                          );
-                                        });
-                                      } else {
-                                        showAlertDialog(BuildContext context) {
-                                          // set up the button
-                                          Widget okButton = TextButton(
-                                            child: const Text(
-                                              "OK",
-                                              style: TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 255, 255, 255),
-                                              ),
-                                            ),
-                                            style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Color(0xff39d98a)),
-                                            onPressed: () {
-                                              Navigator.of(context,
-                                                      rootNavigator: true)
-                                                  .pop("dialog");
-                                            },
-                                          );
-
-                                          // set up the AlertDialog
-                                          AlertDialog alert = AlertDialog(
-                                            title: Text("Not Enough Tokens"),
-                                            content: Text(
-                                                "Please Buy More Tokens On Our Website To Play"),
-                                            actions: [
-                                              okButton,
-                                            ],
-                                          );
-
-                                          // show the dialog
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return alert;
-                                            },
-                                          );
-                                        }
-
-                                        showAlertDialog(context);
-                                      }
-                                    },
-                                    child: const ActionButton(
-                                        text: "Quiz to Earn", width: 128),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      child: Container(
-                        color: Colors.white,
-                        child: Image.asset(
-                          "assets/images/green_curve.png",
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 25.h,
-                ),
-                Stack(
-                  children: [
-                    Container(
-                      width: 280.w,
-                      height: 160,
+                      height: 200,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: const BorderRadius.only(
@@ -643,10 +467,18 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
                                     ),
                                   ],
                                 ),
-                                const ActionButton(
-                                  text: "Invite to earn",
-                                  width: 138,
+                                InkWell(
+                                  onTap: () => launchUrl(
+                                      Uri.parse('https://quizbox-buy.netlify.app/')),
+                                  child: const ActionButton(
+                                    text: "Buy/Claim",
+                                    //   width: 138,
+                                  ),
                                 ),
+                                // const ActionButton(
+                                //   text: "Buy/Claim",
+                                //   width: 138,
+                                // ),
                               ],
                             ),
                           ),
